@@ -19,16 +19,12 @@ public class MongoDBConstant {
     public static final String RECENT_TRANSACTIONS = "recentTransactions";
     public static final String RECENT_PAYMENTS = "recentPayments";
     public static final String RECENT_PRODUCTS = "recentProducts";
-    public static final String JSON_MAPPING_EXCEPTION = "Json Mapping Exception";
-    public static final String JSON_PARSE_EXCEPTION = "Json Parse Exception";
-    public static final String IO_EXCEPTION = "IO Exception";
     public static final String APPLICATION_DETAILS = "applicationDetails";
     public static final String FORMS = "forms";
     public static final String RECORDS_COUNT = "recordsCount";
     public static final String UNIQUE_POLICY_NUMBER = "uniquePolicyNumber";
     public static final String QUOTE_ID = "quoteId";
     public static final String CUSTOMER_NAME = "customerName";
-    public static final String PRODUCTS_VIEWED = "productsViewed";
     public static final String PAYMENT_DETAILS = "omniPaymentDetails";
     public static final String APPLICATION_ID = "applicationId";
     public static final String PERCENTAGE_COMPLETE = "percentageComplete";
@@ -36,5 +32,4 @@ public class MongoDBConstant {
     public static final String JOURNEY_COMPLETION_FLAG = "false";
     public static final String PERCENTAGE_OF_JOURNEY = "0";
     public static final String APPLICATION_FORM_DETAILS = "applicationFormDetails";
-    public static final String CUSTOMER_ID = "customerId";
 }

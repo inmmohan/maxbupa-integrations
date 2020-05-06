@@ -8,8 +8,6 @@ public class WebHookServiceConstant {
     private WebHookServiceConstant(){
 
     }
-    public static final String MAXBUPAAPIUSERPWD = "maxbupaapiuser";
-    public static final String MAXBUPAAPIUSER = MAXBUPAAPIUSERPWD;
     public static final String SOAP_ENVELOPE_PART_START = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:max:dropOffData\"> <soapenv:Header/>";
     public static final String SOAP_ENVELOPE_PART_END = "</soapenv:Envelope>";
     public static final String SOAP_BODY_PART_START	 =	"<soapenv:Body> <urn:insertDropOffData>  <urn:sessiontoken>maxbupaapiuser/maxbupaapiuser</urn:sessiontoken> <urn:dropOffData> <data>";
@@ -18,7 +16,6 @@ public class WebHookServiceConstant {
     public static final String SAMPLE_EVENT_TRIGGERED = "Sample Event Triggered";
     public static final String REAL_EVENT_TRIGGERED = "Event Triggered";
     public static final String TRIGGER_ID = "triggerId";
-    public static final String VISITOR_ID = "visitorId";
     public static final String EVENT_ID = "eventId";
     public static final String MC_ID = "mcId";
     public static final String COM_ADOBE_MCLOUD_PROTOCOL_TRIGGER = "comAdobeMcloudProtocolTrigger";
@@ -28,17 +25,10 @@ public class WebHookServiceConstant {
     public static final String ENRICHMENT_DATA_START = "<enrichments>";
     public static final String ENRICHMENT_DATA_END = "</enrichments>";
     public static final String ANALYTICS_HIT_SUMMARY = "analyticsHitSummary";
-    public static final String BAD_REQUEST_EXCEPTION_MESSAGE =
-            "400 Bad request The request could not be understood or was missing required parameters";
-    public static final String CONTENT_TYPE_APP_JSON = "application/json";
-    public static final String CONTENT_TYPE = "contentType";
-    public static final String AUTH_HEADER_KEY = "Authorization";
-    public static final String AUTH_BEREAR_KEY_SPACE = "Bearer ";
     public static final String PHONE_NUMBER = "phoneNumber";
     public static final String EMAIL_ADDRESS = "emailAddress";
     public static final String NAME = "name";
     public static final String FORMS = "forms";
-    public static final String RECENT_QUOTES = "recentQuotes";
     public static final String FORMATTED_DOB = "formattedDob";
     public static final String DOB = "dateOfBirth";
     public static final String CUSTOMER_ID = "customerId";

@@ -17,9 +17,7 @@ public class SoapClient {
             soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_START);
             soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_START);
             soapRequest.append(dropOffData);
-            //soapRequest.append("\t<dropOffData formId=\"asas\" formName=\""+eventId+"\" triggerId=\""+triggerId+"\" visitorId=\""+visitorId+"\"/>\n");
             soapRequest.append(WebHookServiceConstant.ENRICHMENT_DATA_START);
-            //soapRequest.append(analyticsData);
             soapRequest.append(WebHookServiceConstant.ENRICHMENT_DATA_END);
             soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_END);
             soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_END);
