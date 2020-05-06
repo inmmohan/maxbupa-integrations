@@ -89,3 +89,4 @@ out
 .DS_Store
 gradlew
 gradlew.bat
+settings.gradle
