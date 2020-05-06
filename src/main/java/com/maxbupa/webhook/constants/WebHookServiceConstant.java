@@ -65,6 +65,7 @@ public class WebHookServiceConstant {
     public static final String DIMENSIONS = "dimensions";
     public static final String BASE_PREMIUM = "basePremium";
     public static final String EVENT_CHECKOUT = "checkouts";
+    public static final String EVENT_PURCHASE = "purchase";
     public static final String EVENT_85 = "event85";
     public static final String EVENT_88 = "event88";
     public static final String EVENT_68 = "event68";
@@ -72,6 +73,7 @@ public class WebHookServiceConstant {
     public static final String EVENT_88_NAME = "Quote DropOff";
     public static final String EVENT_CHECKOUT_NAME = "Purchase DropOff";
     public static final String EVENT_68_NAME = "App Form DropOff";
+    public static final String EVENT_PURCHASE_NAME = "Purchase Success";
     public static final Map<String, String> eventNameConfig;
     static {
         eventNameConfig = new HashMap<>();
@@ -79,5 +81,6 @@ public class WebHookServiceConstant {
         eventNameConfig.put(EVENT_88, EVENT_88_NAME);
         eventNameConfig.put(EVENT_CHECKOUT, EVENT_CHECKOUT_NAME);
         eventNameConfig.put(EVENT_68, EVENT_68_NAME);
+        eventNameConfig.put(EVENT_PURCHASE, EVENT_PURCHASE_NAME);
     }
 }

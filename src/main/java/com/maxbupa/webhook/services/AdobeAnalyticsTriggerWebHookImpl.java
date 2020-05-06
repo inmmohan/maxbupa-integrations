@@ -153,7 +153,7 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         if (null != eventJson && eventJson.has(WebHookServiceConstant.RECENT_PAYMENTS)) {
             if (dropOffData.getEventId().equals(WebHookServiceConstant.EVENT_68) ||
                     dropOffData.getEventId().equals(WebHookServiceConstant.EVENT_CHECKOUT) ||
-                    dropOffData.getEventId().equals(WebHookServiceConstant.EVENT_CHECKOUT)) {
+                    dropOffData.getEventId().equals(WebHookServiceConstant.EVENT_PURCHASE)) {
                 final JSONArray recentPayments = eventJson.getJSONArray(WebHookServiceConstant.RECENT_PAYMENTS);
                 if (recentPayments.length() > 0) {
                     final JSONObject paymentJson = recentPayments.getJSONObject(0);
