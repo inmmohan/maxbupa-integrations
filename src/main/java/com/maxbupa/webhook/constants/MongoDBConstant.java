@@ -32,4 +32,5 @@ public class MongoDBConstant {
     public static final String JOURNEY_COMPLETION_FLAG = "false";
     public static final String PERCENTAGE_OF_JOURNEY = "0";
     public static final String APPLICATION_FORM_DETAILS = "applicationFormDetails";
+    public static final String WEBHOOK_REQUEST = "webhookRequest";
 }

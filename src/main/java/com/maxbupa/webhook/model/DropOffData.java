@@ -9,6 +9,9 @@ public class DropOffData {
     @JacksonXmlProperty(isAttribute = true, localName="eventId")
     private String eventId;
 
+    @JacksonXmlProperty(isAttribute = true, localName="requestId")
+    private String requestId;
+
     @JacksonXmlProperty(isAttribute = true, localName = "eventName")
     private String eventName;
 
@@ -312,5 +315,13 @@ public class DropOffData {
 
     public void setCriticalIllnessSumInsured(String criticalIllnessSumInsured) {
         this.criticalIllnessSumInsured = criticalIllnessSumInsured;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

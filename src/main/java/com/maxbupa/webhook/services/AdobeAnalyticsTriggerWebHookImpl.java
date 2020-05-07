@@ -1,5 +1,7 @@
 package com.maxbupa.webhook.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.maxbupa.webhook.constants.MongoDBConstant;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -69,7 +73,8 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
             final String dropOffData = createDropOffDataRequest(eventJsonObjectData, trigJsonObjectData.getString("event_id"));
             logger.info(WebHookServiceConstant.ANALYTICS_TRIGGER_DATA_CAPTURED);
             logger.info(String.valueOf(triggerResponse));
-            new SoapClient(dropOffData);
+            final String campaignXml = constructCampaignRequestXml(dropOffData);
+            new SoapClient(campaignXml);
         } catch (Exception e) {
             assert triggerResponse != null;
             triggerResponse.put("error", e.getMessage());
@@ -91,6 +96,7 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
     private String createDropOffDataRequest(final JSONObject eventJsonObjectData, final String eventId) {
         String dropOffRequest = "";
         DropOffData dropOffData = new DropOffData();
+        dropOffData.setRequestId(eventId);
         dropOffData = fetchEventDetails(eventJsonObjectData, dropOffData);
         dropOffData.setVisitorId(eventJsonObjectData.getString(WebHookServiceConstant.MC_ID));
         logger.info("******MCID********"+eventJsonObjectData.getString(WebHookServiceConstant.MC_ID));
@@ -500,5 +506,31 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
             }
         }
         return dropOffData;
+    }
+
+    private String constructCampaignRequestXml(String dropOffData) {
+        final StringBuilder soapRequest = new StringBuilder();
+        soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_START);
+        soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_START);
+        soapRequest.append(dropOffData);
+        soapRequest.append(WebHookServiceConstant.ENRICHMENT_DATA_START);
+        soapRequest.append(WebHookServiceConstant.ENRICHMENT_DATA_END);
+        soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_END);
+        soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_END);
+        final String soapEnvelope = soapRequest.toString();
+        webhookRequestLog(soapEnvelope);
+        return soapEnvelope;
+    }
+
+    private void webhookRequestLog(String soapEnvelope) {
+        try {
+            XmlMapper xmlMapper = new XmlMapper();
+            JsonNode node = xmlMapper.readTree(soapEnvelope);
+            ObjectMapper jsonMapper = new ObjectMapper();
+            String webhookRequest = jsonMapper.writeValueAsString(node);
+            mongoTemplate.insert(webhookRequest, MongoDBConstant.WEBHOOK_REQUEST);
+        } catch (IOException io) {
+            logger.error("Error logging webhook request");
+        }
     }
 }

@@ -1,8 +1,16 @@
 package com.maxbupa.webhook.utilities;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.maxbupa.webhook.constants.MongoDBConstant;
 import com.maxbupa.webhook.constants.WebHookServiceConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -11,17 +19,15 @@ import java.net.URL;
 public class SoapClient {
     private static final Logger logger = LoggerFactory.getLogger(SoapClient.class);
 
-    public SoapClient(String dropOffData){
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    public SoapClient(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
+
+    public SoapClient(String soapEnvelope){
         try {
-            final StringBuilder soapRequest = new StringBuilder();
-            soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_START);
-            soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_START);
-            soapRequest.append(dropOffData);
-            soapRequest.append(WebHookServiceConstant.ENRICHMENT_DATA_START);
-            soapRequest.append(WebHookServiceConstant.ENRICHMENT_DATA_END);
-            soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_END);
-            soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_END);
-            final String soapEnvelope = soapRequest.toString();
             final String url = "https://maxbupahealthinsurance-mkt-stage1.campaign.adobe.com/nl/jsp/soaprouter.jsp";
             final URL obj = new URL(url);
             final HttpURLConnection soapConnection = (HttpURLConnection) obj.openConnection();
@@ -43,6 +49,4 @@ public class SoapClient {
             logger.error(e.getMessage());
         }
     }
-
-
 }
