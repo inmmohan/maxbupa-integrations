@@ -522,12 +522,12 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         return soapEnvelope;
     }
 
-    private void webhookRequestLog(String soapEnvelope) {
+    private void webhookRequestLog(final String soapEnvelope) {
         try {
-            XmlMapper xmlMapper = new XmlMapper();
-            JsonNode node = xmlMapper.readTree(soapEnvelope);
-            ObjectMapper jsonMapper = new ObjectMapper();
-            String webhookRequest = jsonMapper.writeValueAsString(node);
+            final XmlMapper xmlMapper = new XmlMapper();
+            final JsonNode node = xmlMapper.readTree(soapEnvelope);
+            final ObjectMapper jsonMapper = new ObjectMapper();
+            final String webhookRequest = jsonMapper.writeValueAsString(node);
             mongoTemplate.insert(webhookRequest, MongoDBConstant.WEBHOOK_REQUEST);
         } catch (IOException io) {
             logger.error("Error logging webhook request");
