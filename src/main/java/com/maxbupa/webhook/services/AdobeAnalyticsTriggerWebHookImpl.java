@@ -28,8 +28,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Iterator;
 
 
@@ -209,7 +212,14 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                 }
             }
             if (formJson.has(WebHookServiceConstant.FORMATTED_DOB)) {
-                dropOffData.setDateOfBirth(formJson.getString(WebHookServiceConstant.FORMATTED_DOB));
+                try {
+                    Date initDob = new SimpleDateFormat("dd/MM/yyyy").parse(formJson.getString(WebHookServiceConstant.FORMATTED_DOB));
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+                    String formattedDob = formatter.format(initDob);
+                    dropOffData.setDateOfBirth(formattedDob);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
             if (formJson.has(WebHookServiceConstant.QUOTE_ID)) {
                 dropOffData.setQuoteId(formJson.getString(WebHookServiceConstant.QUOTE_ID));
