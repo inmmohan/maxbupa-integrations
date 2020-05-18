@@ -27,7 +27,9 @@ public class WebHookServiceConstant {
     public static final String ANALYTICS_HIT_SUMMARY = "analyticsHitSummary";
     public static final String PHONE_NUMBER = "phoneNumber";
     public static final String EMAIL_ADDRESS = "emailAddress";
+    public static final String EMAIL_ID = "emailId";
     public static final String NAME = "name";
+    public static final String CUSTOMER_NAME = "customerName";
     public static final String FORMS = "forms";
     public static final String FORMATTED_DOB = "formattedDob";
     public static final String DOB = "dateOfBirth";

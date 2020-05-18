@@ -183,6 +183,18 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         if (premiumJson.has(WebHookServiceConstant.APPLICATION_ID)) {
             dropOffData.setApplicationId(premiumJson.getString(WebHookServiceConstant.APPLICATION_ID));
         }
+        if (paymentJson.has(WebHookServiceConstant.QUOTE_ID)) {
+            dropOffData.setQuoteId(paymentJson.getString(WebHookServiceConstant.QUOTE_ID));
+        }
+        if (paymentJson.has(WebHookServiceConstant.CUSTOMER_NAME) ) {
+            dropOffData.setName(paymentJson.getString(WebHookServiceConstant.CUSTOMER_NAME));
+        }
+        if (paymentJson.has(WebHookServiceConstant.EMAIL_ID) ) {
+            dropOffData.setEmailAddress(paymentJson.getString(WebHookServiceConstant.EMAIL_ID));
+        }
+        if (paymentJson.has(WebHookServiceConstant.PHONE_NUMBER) ) {
+            dropOffData.setPhoneNumber(paymentJson.getString(WebHookServiceConstant.PHONE_NUMBER));
+        }
         return dropOffData;
     }
 
@@ -207,7 +219,7 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                     final DateTimeFormatter inputFormat =
                             DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy");
                     final ZonedDateTime parsed = ZonedDateTime.parse(date, inputFormat);
-                    final DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    final DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd");
                     dropOffData.setDateOfBirth(outputFormat.format(parsed));
                 }
             }
@@ -323,6 +335,9 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                     }
                     if (key.equals("eVar35")) {
                         productId = String.valueOf(dataArray.get(0));
+                        if (productId.contains("_CC")) {
+                            productId = productId.replaceAll("_CC", "");
+                        }
                         logger.info("******Product ID*****"+productId);
                     }
                 }
@@ -394,6 +409,8 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         paymentDetail.fields().include(MongoDBConstant.QUOTE_ID);
         paymentDetail.fields().include(WebHookServiceConstant.PREMIUM);
         paymentDetail.fields().include(MongoDBConstant.UNIQUE_POLICY_NUMBER);
+        paymentDetail.fields().include(WebHookServiceConstant.PHONE_NUMBER);
+        paymentDetail.fields().include(WebHookServiceConstant.EMAIL_ID);
         JSONArray paymentDetailArray = new JSONArray(mongoTemplate
                 .find(paymentDetail, Object.class, MongoDBConstant.PAYMENT_DETAILS));
 
@@ -419,6 +436,12 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                         }
                         if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.UNIQUE_POLICY_NUMBER)) {
                             resultantJson.put(MongoDBConstant.UNIQUE_POLICY_NUMBER, paymentDetailJson.getString(MongoDBConstant.UNIQUE_POLICY_NUMBER));
+                        }
+                        if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.PHONE_NUMBER)) {
+                            resultantJson.put(WebHookServiceConstant.PHONE_NUMBER, paymentDetailJson.getString(WebHookServiceConstant.PHONE_NUMBER));
+                        }
+                        if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.EMAIL_ID)) {
+                            resultantJson.put(WebHookServiceConstant.EMAIL_ID, paymentDetailJson.getString(WebHookServiceConstant.EMAIL_ID));
                         }
                         if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.QUOTE_ID)) {
                             resultantJson.put(MongoDBConstant.QUOTE_ID, paymentDetailJson.getString(MongoDBConstant.QUOTE_ID));
