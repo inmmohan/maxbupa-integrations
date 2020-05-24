@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -66,18 +67,13 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
             JSONObject trigJsonObjectData = new JSONObject(triggerData);
             triggerResponse.put(WebHookServiceConstant.EVENT_ID, trigJsonObjectData.get("event_id"));
             JSONObject eventJsonObjectData = new JSONObject(trigJsonObjectData.get(WebHookServiceConstant.EVENT).toString());
-            if (null != eventJsonObjectData && eventJsonObjectData.has(WebHookServiceConstant.EVENT)) {
-                logger.info(WebHookServiceConstant.REAL_EVENT_TRIGGERED);
-            } else {
-                logger.info(WebHookServiceConstant.SAMPLE_EVENT_TRIGGERED);
-            }
             eventJsonObjectData = (JSONObject) eventJsonObjectData.get(WebHookServiceConstant.COM_ADOBEM_CLOUD_PIPELINE_PIPELINE_MESSAGE);
             eventJsonObjectData = (JSONObject) eventJsonObjectData.get(WebHookServiceConstant.COM_ADOBE_MCLOUD_PROTOCOL_TRIGGER);
-            final String dropOffData = createDropOffDataRequest(eventJsonObjectData, trigJsonObjectData.getString("event_id"));
+            DropOffData dropOffObj = new DropOffData();
+            final String dropOffData = createDropOffDataRequest(eventJsonObjectData, trigJsonObjectData.getString("event_id"), dropOffObj);
             logger.info(WebHookServiceConstant.ANALYTICS_TRIGGER_DATA_CAPTURED);
             logger.info(String.valueOf(triggerResponse));
-            final String campaignXml = constructCampaignRequestXml(dropOffData);
-            new SoapClient(campaignXml);
+            final String campaignXml = constructCampaignRequestXml(dropOffData,dropOffObj);
         } catch (Exception e) {
             assert triggerResponse != null;
             triggerResponse.put("error", e.getMessage());
@@ -96,9 +92,9 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         return responseJson;
     }
 
-    private String createDropOffDataRequest(final JSONObject eventJsonObjectData, final String eventId) {
+    private String createDropOffDataRequest(final JSONObject eventJsonObjectData, final String eventId, DropOffData dropOffData) {
         String dropOffRequest = "";
-        DropOffData dropOffData = new DropOffData();
+
         dropOffData.setRequestId(eventId);
         dropOffData = fetchEventDetails(eventJsonObjectData, dropOffData);
         dropOffData.setVisitorId(eventJsonObjectData.getString(WebHookServiceConstant.MC_ID));
@@ -144,6 +140,9 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                 JSONArray dataArray = data.getJSONArray("data");
                 if (dataArray.length() > 0) {
                     dropOffElement.setAttribute(key, String.valueOf(dataArray.get(0)));
+                    if (key.equals("eVar19") && !dropOffRequest.contains("quoteId")) {
+                        dropOffElement.setAttribute("quoteId", String.valueOf(dataArray.get(0)));
+                    }
                 }
             }
         }
@@ -421,97 +420,36 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
             }
             JSONObject resultantJson = new JSONObject();
             JSONObject paymentDetailJson = paymentDetailArray.getJSONObject(i);
-            JSONArray applicationStatusArray = new JSONArray();
             if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.PREMIUM)) {
                 resultantJson.put(WebHookServiceConstant.PREMIUM, paymentDetailJson.get(WebHookServiceConstant.PREMIUM));
                 JSONArray premiumArray = (JSONArray) paymentDetailJson.get(WebHookServiceConstant.PREMIUM);
-                JSONObject applicationStatuJson = getApplicationDetails(premiumArray);
-                if(applicationStatuJson != null && applicationStatuJson.has(MongoDBConstant.RECORDS_COUNT)){
-                    recordsCount = recordsCount + applicationStatuJson.getInt(MongoDBConstant.RECORDS_COUNT);
-                    applicationStatusArray.put(applicationStatuJson);
-                    if(applicationStatusArray.length() > 0){
-                        resultantJson.put(MongoDBConstant.APPLICATION_DETAILS,applicationStatusArray);
-                        if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.CUSTOMER_NAME)) {
-                            resultantJson.put(MongoDBConstant.CUSTOMER_NAME, paymentDetailJson.getString(MongoDBConstant.CUSTOMER_NAME));
-                        }
-                        if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.UNIQUE_POLICY_NUMBER)) {
-                            resultantJson.put(MongoDBConstant.UNIQUE_POLICY_NUMBER, paymentDetailJson.getString(MongoDBConstant.UNIQUE_POLICY_NUMBER));
-                        }
-                        if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.PHONE_NUMBER)) {
-                            resultantJson.put(WebHookServiceConstant.PHONE_NUMBER, paymentDetailJson.getString(WebHookServiceConstant.PHONE_NUMBER));
-                        }
-                        if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.EMAIL_ID)) {
-                            resultantJson.put(WebHookServiceConstant.EMAIL_ID, paymentDetailJson.getString(WebHookServiceConstant.EMAIL_ID));
-                        }
-                        if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.QUOTE_ID)) {
-                            resultantJson.put(MongoDBConstant.QUOTE_ID, paymentDetailJson.getString(MongoDBConstant.QUOTE_ID));
-                            Query quoteDetails = new Query();
-                            quoteDetails.addCriteria(Criteria.where(MongoDBConstant.FORMS_QUOTE_ID).is(paymentDetailJson.getString(MongoDBConstant.QUOTE_ID)));
-                            quoteDetails.fields().exclude(MongoDBConstant.ID);
-                            quoteDetails.fields().include(MongoDBConstant.FORMS);
-                            resultantJson.put(MongoDBConstant.FORMS, mongoTemplate.find(quoteDetails, Object.class, MongoDBConstant.ONLINE_LEADS));
-                        }
-                        recentPayments.put(resultantJson);
-                    }
+                if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.CUSTOMER_NAME)) {
+                    resultantJson.put(MongoDBConstant.CUSTOMER_NAME, paymentDetailJson.getString(MongoDBConstant.CUSTOMER_NAME));
                 }
+                if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.UNIQUE_POLICY_NUMBER)) {
+                    resultantJson.put(MongoDBConstant.UNIQUE_POLICY_NUMBER, paymentDetailJson.getString(MongoDBConstant.UNIQUE_POLICY_NUMBER));
+                }
+                if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.PHONE_NUMBER)) {
+                    resultantJson.put(WebHookServiceConstant.PHONE_NUMBER, paymentDetailJson.getString(WebHookServiceConstant.PHONE_NUMBER));
+                }
+                if (paymentDetailJson != null && paymentDetailJson.has(WebHookServiceConstant.EMAIL_ID)) {
+                    resultantJson.put(WebHookServiceConstant.EMAIL_ID, paymentDetailJson.getString(WebHookServiceConstant.EMAIL_ID));
+                }
+                if (paymentDetailJson != null && paymentDetailJson.has(MongoDBConstant.QUOTE_ID)) {
+                    resultantJson.put(MongoDBConstant.QUOTE_ID, paymentDetailJson.getString(MongoDBConstant.QUOTE_ID));
+                    Query quoteDetails = new Query();
+                    quoteDetails.addCriteria(Criteria.where(MongoDBConstant.FORMS_QUOTE_ID).is(paymentDetailJson.getString(MongoDBConstant.QUOTE_ID)));
+                    quoteDetails.fields().exclude(MongoDBConstant.ID);
+                    quoteDetails.fields().include(MongoDBConstant.FORMS);
+                    resultantJson.put(MongoDBConstant.FORMS, mongoTemplate.find(quoteDetails, Object.class, MongoDBConstant.ONLINE_LEADS));
+                }
+                if (null != premiumArray && premiumArray.length() > 0) {
+                    resultantJson.put(WebHookServiceConstant.PREMIUM, premiumArray);
+                }
+                recentPayments.put(resultantJson);
             }
         }
         return recentPayments;
-    }
-
-    private JSONObject getApplicationDetails(JSONArray premiumArray){
-        JSONObject applicationStatusJson = null;
-        if (premiumArray.length() > 0) {
-            JSONObject premiumJson = premiumArray.getJSONObject(0);
-            if (premiumJson != null && premiumJson.has(MongoDBConstant.APPLICATION_ID)) {
-                Query applicationQuery = new Query();
-                applicationQuery.addCriteria(
-                        Criteria.where(MongoDBConstant.APPLICATION_ID).is(premiumJson.getString(MongoDBConstant.APPLICATION_ID)));
-                applicationQuery.fields().exclude(MongoDBConstant.ID);
-                applicationQuery.fields().include(MongoDBConstant.PERCENTAGE_COMPLETE);
-                applicationQuery.fields().include(MongoDBConstant.JOURNEY_COMPLETE);
-                JSONArray applicationArray = new JSONArray(mongoTemplate.find(applicationQuery, Object.class,
-                        MongoDBConstant.APPLICATION_FORM_DETAILS));
-                if(applicationArray.length() > 0){
-                    applicationStatusJson = journeyApplicationStatus(applicationArray.getJSONObject(0));
-                    if(applicationStatusJson != null ){
-                        applicationStatusJson.put(MongoDBConstant.RECORDS_COUNT,1);
-                    }
-                }else{
-                    applicationStatusJson = setJourneyStatus();
-                    applicationStatusJson.put(MongoDBConstant.RECORDS_COUNT,1);
-                }
-            }else{
-                applicationStatusJson = setJourneyStatus();
-                applicationStatusJson.put(MongoDBConstant.RECORDS_COUNT,1);
-            }
-        }
-        return applicationStatusJson;
-    }
-
-    private JSONObject journeyApplicationStatus(JSONObject applicationJson){
-        JSONObject applicationStatusJson = null;
-        if(applicationJson != null && applicationJson.has(MongoDBConstant.JOURNEY_COMPLETE)){
-            String journeyStatus = applicationJson.getString(MongoDBConstant.JOURNEY_COMPLETE);
-            if(journeyStatus != null && journeyStatus.equalsIgnoreCase("true")){
-                return applicationStatusJson;
-            }else{
-                applicationStatusJson = new JSONObject();
-                applicationStatusJson.put(MongoDBConstant.JOURNEY_COMPLETE,journeyStatus);
-                if(applicationJson != null && applicationJson.has(MongoDBConstant.PERCENTAGE_COMPLETE)){
-                    applicationStatusJson.put(MongoDBConstant.PERCENTAGE_COMPLETE,applicationJson.getString(MongoDBConstant.PERCENTAGE_COMPLETE));
-                }
-            }
-        }
-        return applicationStatusJson;
-    }
-
-    private JSONObject setJourneyStatus(){
-        JSONObject applicationStatusJson = new JSONObject();
-        applicationStatusJson.put(MongoDBConstant.PERCENTAGE_COMPLETE,MongoDBConstant.PERCENTAGE_OF_JOURNEY);
-        applicationStatusJson.put(MongoDBConstant.JOURNEY_COMPLETE,MongoDBConstant.JOURNEY_COMPLETION_FLAG);
-        applicationStatusJson.put(MongoDBConstant.RECORDS_COUNT,1);
-        return applicationStatusJson;
     }
 
     private DropOffData fetchEventDetails(JSONObject eventJson, DropOffData dropOffData) {
@@ -541,7 +479,7 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         return dropOffData;
     }
 
-    private String constructCampaignRequestXml(String dropOffData) {
+    private String constructCampaignRequestXml(String dropOffData, DropOffData dropOffObj) {
         final StringBuilder soapRequest = new StringBuilder();
         soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_START);
         soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_START);
@@ -551,19 +489,41 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         soapRequest.append(WebHookServiceConstant.SOAP_BODY_PART_END);
         soapRequest.append(WebHookServiceConstant.SOAP_ENVELOPE_PART_END);
         final String soapEnvelope = soapRequest.toString();
-        webhookRequestLog(soapEnvelope);
+        boolean sendToCampaign = validateDropOffData(dropOffData, dropOffObj);
+        webhookRequestLog(soapEnvelope, sendToCampaign);
+        if (sendToCampaign) {
+            new SoapClient(soapEnvelope);
+        }
         return soapEnvelope;
     }
 
-    private void webhookRequestLog(final String soapEnvelope) {
+    private void webhookRequestLog(final String soapEnvelope, boolean sendToCampaign) {
         try {
             final XmlMapper xmlMapper = new XmlMapper();
             final JsonNode node = xmlMapper.readTree(soapEnvelope);
             final ObjectMapper jsonMapper = new ObjectMapper();
             final String webhookRequest = jsonMapper.writeValueAsString(node);
-            mongoTemplate.insert(webhookRequest, MongoDBConstant.WEBHOOK_REQUEST);
+            final JSONObject loggerJson = new JSONObject(webhookRequest);
+            loggerJson.put("timeStamp", LocalDateTime.now());
+            loggerJson.put("campaignStatus", sendToCampaign);
+            mongoTemplate.insert(loggerJson.toString(), MongoDBConstant.WEBHOOK_REQUEST);
         } catch (IOException io) {
             logger.error("Error logging webhook request");
         }
+    }
+
+    private boolean validateDropOffData(final String dropOffData, final DropOffData dropOffObj) {
+        boolean isValid = Boolean.TRUE;
+        if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_68)) {
+            if (!dropOffData.contains("applicationId")) {
+                isValid = Boolean.FALSE;
+            }
+        }
+        if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_88)) {
+            if (!dropOffData.contains("quoteId")) {
+                isValid = Boolean.FALSE;
+            }
+        }
+        return isValid;
     }
 }
