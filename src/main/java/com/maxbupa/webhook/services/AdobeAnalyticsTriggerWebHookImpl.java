@@ -303,7 +303,7 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         JSONArray recentQuotes = null;
         JSONArray recentProducts = null;
 
-        Pageable pageable = PageRequest.of(0, 2);
+        Pageable pageable = PageRequest.of(0,2 );
         JSONObject analyticsJson = new JSONObject(analyticsData.trim());
         Iterator<String> keys = analyticsJson.keys();
         while(keys.hasNext()) {
@@ -331,6 +331,10 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                                 }
                             }
                         }
+                    }
+
+                    if (key.equals("eVar19")) {
+                        quoteId = String.valueOf(dataArray.get(0));
                     }
                     if (key.equals("eVar35")) {
                         productId = String.valueOf(dataArray.get(0));
@@ -515,12 +519,18 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
     private boolean validateDropOffData(final String dropOffData, final DropOffData dropOffObj) {
         boolean isValid = Boolean.TRUE;
         if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_68)) {
-            if (!dropOffData.contains("applicationId")) {
+            if (!dropOffData.contains("applicationId") && !dropOffData.contains("eVar53")) {
                 isValid = Boolean.FALSE;
             }
         }
         if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_88)) {
             if (!dropOffData.contains("quoteId")) {
+                isValid = Boolean.FALSE;
+            }
+        }
+        if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_CHECKOUT) ||
+                dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_PURCHASE)) {
+            if (!dropOffData.contains("applicationId")) {
                 isValid = Boolean.FALSE;
             }
         }
