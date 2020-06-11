@@ -371,12 +371,12 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
         if (!StringUtils.isEmpty(quoteId)) {
             fetchProductViewed.addCriteria(Criteria.where(MongoDBConstant.FORMS_QUOTE_ID).is(quoteId));
         }
-        if (!StringUtils.isEmpty(productId)) {
+        if (!StringUtils.isEmpty(productId) && StringUtils.isEmpty(quoteId)) {
             fetchProductViewed.addCriteria((Criteria.where(MongoDBConstant.FORMS_GET_QUOTE_PRODUCT_ID).is(productId)));
         }
         fetchProductViewed.addCriteria(Criteria.where(MongoDBConstant.MCID).is(mcid));
         fetchProductViewed.with(new Sort(Sort.Direction.DESC, MongoDBConstant.DATE_TIME));
-        fetchQuoteGenerated.fields().exclude(MongoDBConstant.ID);
+        fetchProductViewed.fields().exclude(MongoDBConstant.ID);
 
         recentProducts = new JSONArray(mongoTemplate
                 .find(fetchProductViewed, Object.class, MongoDBConstant.ONLINE_LEADS));

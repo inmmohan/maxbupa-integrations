@@ -21,7 +21,7 @@ public class SoapClient {
 
     public SoapClient(String soapEnvelope){
         try {
-            final String url = "https://maxbupahealthinsurance-mkt-stage1.campaign.adobe.com/nl/jsp/soaprouter.jsp";
+            final String url = "https://maxbupahealthinsurance.campaign.adobe.com/nl/jsp/soaprouter.jsp";
             final URL obj = new URL(url);
             final HttpURLConnection soapConnection = (HttpURLConnection) obj.openConnection();
             soapConnection.setDoOutput(true);
