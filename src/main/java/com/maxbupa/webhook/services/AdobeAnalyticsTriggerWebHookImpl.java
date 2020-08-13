@@ -523,11 +523,11 @@ public class AdobeAnalyticsTriggerWebHookImpl implements AdobeAnalyticsTriggerWe
                 isValid = Boolean.FALSE;
             }
         }
-        if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_88)) {
+       /* if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_88)) {
             if (!dropOffData.contains("quoteId")) {
                 isValid = Boolean.FALSE;
             }
-        }
+        }*/
         if (dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_CHECKOUT) ||
                 dropOffObj.getEventId().equals(WebHookServiceConstant.EVENT_PURCHASE)) {
             if (!dropOffData.contains("applicationId")) {
